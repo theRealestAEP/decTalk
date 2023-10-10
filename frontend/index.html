@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<h2>Enter Text for decTalk:</h2>
+<form id="speechForm">
+    <textarea id="text" rows="4" cols="50" placeholder="Enter your text here..."></textarea><br><br>
+    
+    <label for="encoding">Encoding:</label>
+    <select id="encoding">
+        <option value="1">PCM, 16 bit Mono 11KHz</option>
+        <option value="2">PCM, 8 bit Mono 11KHz</option>
+        <option value="3">MULAW 8 bit Mono 8KHz</option>
+    </select><br><br>
+
+    <label for="rate">Speaking Rate (75-600):</label>
+    <input type="number" id="rate" value="100" min="75" max="600"><br><br>
+
+    <label for="volume">Volume (0-100):</label>
+    <input type="number" id="volume" value="100" min="0" max="100"><br><br>
+
+    <label for="speaker">Speaker (0-9):</label>
+    <input type="number" id="speaker" value="0" min="0" max="9"><br><br>
+
+    <label for="language">Language:</label>
+    <select id="language">
+        <option value="us">US</option>
+        <option value="uk">UK</option>
+        <option value="gr">GR</option>
+        <option value="sp">SP</option>
+        <option value="la">LA</option>
+        <option value="fr">FR</option>
+    </select><br><br>
+
+    <label for="mode">Mode:</label>
+    <select id="mode">
+        <option value="-">Line Mode</option>
+        <option value="-c -">Clause Mode</option>
+    </select><br><br>
+
+    <input type="submit" value="Convert to Speech">
+</form>
+
+<h2>Listen to the Speech:</h2>
+<audio id="audioPlayer" controls></audio>
+
+<script>
+    $(document).ready(function() {
+        $("#speechForm").submit(function(event) {
+            event.preventDefault();
+
+            // Fetch all the form values
+            const formData = {
+                text: $("#text").val(),
+                encoding: $("#encoding").val(),
+                rate: $("#rate").val(),
+                volume: $("#volume").val(),
+                speaker: $("#speaker").val(),
+                language: $("#language").val(),
+                mode: $("#mode").val()
+            };
+
+            // Send an AJAX request to your server
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/say",
+                data: formData,
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(data) {
+                    const blob = new Blob([data], { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+                },
+                error: function(error) {
+                    console.error("Error:", error);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
